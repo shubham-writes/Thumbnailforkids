@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { motion } from "framer-motion";
@@ -7,6 +8,7 @@ import { Download, Sparkles } from "lucide-react";
 
 export default function HistoryGallery() {
   const thumbnails = useQuery(api.thumbnails.getRecentThumbnails);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   if (thumbnails === undefined) {
     return (
@@ -37,53 +39,62 @@ export default function HistoryGallery() {
           hidden: {}
         }}
       >
-        {thumbnails.map((item) => (
-          <motion.div
-            key={item._id}
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              visible: { opacity: 1, y: 0 }
-            }}
-            whileHover={{ y: -5, scale: 1.02 }}
-            className="group relative aspect-video rounded-2xl overflow-hidden glass-card shadow-lg hover:shadow-2xl transition-all"
-          >
-            <img
-              src={item.imageUrl}
-              alt={item.prompt}
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
+        {thumbnails.map((item) => {
+          const isActive = activeId === item._id;
 
-            {/* Hover overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
-              <p className="text-white text-sm font-medium line-clamp-2 leading-tight mb-2 drop-shadow-md">
-                "{item.prompt}"
-              </p>
-              <button
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  try {
-                    const response = await fetch(item.imageUrl);
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = `KidsThumb-${item._id}.png`;
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                  } catch (error) {
-                    console.error("Gallery download failed", error);
-                    window.open(item.imageUrl, "_blank");
-                  }
-                }}
-                className="self-end bg-white/20 hover:bg-white/40 p-2 rounded-full backdrop-blur-md transition-colors"
-                title="Download"
+          return (
+            <motion.div
+              key={item._id}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0 }
+              }}
+              whileHover={{ y: -5, scale: 1.02 }}
+              onHoverStart={() => setActiveId(item._id)}
+              onHoverEnd={() => setActiveId(null)}
+              onClick={() => setActiveId(isActive ? null : item._id)}
+              className="relative aspect-video rounded-2xl overflow-hidden glass-card shadow-lg hover:shadow-2xl transition-all cursor-pointer"
+            >
+              <img
+                src={item.imageUrl}
+                alt={item.prompt}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+
+              {/* Secure React State Overlay */}
+              <div 
+                className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4 transition-opacity duration-300 ${isActive ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
               >
-                <Download className="w-4 h-4 text-white" />
-              </button>
-            </div>
-          </motion.div>
-        ))}
+                <p className="text-white text-sm font-medium line-clamp-2 leading-tight mb-2 drop-shadow-md">
+                  "{item.prompt}"
+                </p>
+                <button
+                  onClick={async (e) => {
+                    e.stopPropagation(); // Stop parent onClick from toggling
+                    try {
+                      const response = await fetch(item.imageUrl);
+                      const blob = await response.blob();
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `KidsThumb-${item._id}.png`;
+                      a.click();
+                      window.URL.revokeObjectURL(url);
+                    } catch (error) {
+                      console.error("Gallery download failed", error);
+                      window.open(item.imageUrl, "_blank");
+                    }
+                  }}
+                  className="self-end bg-white/20 hover:bg-white/40 p-2 rounded-full backdrop-blur-md transition-colors cursor-pointer"
+                  title="Download"
+                >
+                  <Download className="w-4 h-4 text-white" />
+                </button>
+              </div>
+            </motion.div>
+          );
+        })}
       </motion.div>
     </div>
   );

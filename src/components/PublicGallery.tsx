@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import { Download } from "lucide-react";
 
 const DUMMY_THUMBNAILS = [
   {
@@ -66,6 +66,24 @@ const DUMMY_THUMBNAILS = [
   },
 ];
 
+async function handleDownload(url: string, prompt: string) {
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = `${prompt.slice(0, 40).replace(/\s+/g, "-")}.jpg`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(blobUrl);
+  } catch {
+    // Fallback: open in new tab
+    window.open(url, "_blank");
+  }
+}
+
 export default function PublicGallery() {
   return (
     <div className="w-full max-w-6xl mx-auto px-4 pb-20">
@@ -85,18 +103,19 @@ export default function PublicGallery() {
         viewport={{ once: true, margin: "-100px" }}
         variants={{
           visible: { transition: { staggerChildren: 0.1 } },
-          hidden: {}
+          hidden: {},
         }}
       >
         {DUMMY_THUMBNAILS.map((item) => (
           <motion.div
             key={item.id}
+            tabIndex={0}
             variants={{
               hidden: { opacity: 0, y: 20 },
-              visible: { opacity: 1, y: 0 }
+              visible: { opacity: 1, y: 0 },
             }}
             whileHover={{ y: -5, scale: 1.02 }}
-            className="group relative aspect-video rounded-3xl overflow-hidden glass-card shadow-lg hover:shadow-2xl transition-all"
+            className="group relative aspect-video rounded-3xl overflow-hidden glass-card shadow-lg hover:shadow-2xl transition-all cursor-pointer focus:outline-none"
           >
             <img
               src={item.url}
@@ -105,12 +124,34 @@ export default function PublicGallery() {
               loading="lazy"
             />
 
-            {/* Hover overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-5">
-              <p className="text-white text-base font-bold line-clamp-2 leading-tight drop-shadow-md">
+            {/* Gradient overlay with prompt text — pointer-events disabled so it doesn't block the button */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 group-focus:opacity-100 group-active:opacity-100 transition-opacity pointer-events-none flex flex-col justify-end p-5">
+              <p className="text-white text-base font-bold line-clamp-2 leading-tight drop-shadow-md pr-10">
                 "{item.prompt}"
               </p>
             </div>
+
+            {/* ✅ Download button — lives OUTSIDE the pointer-events-none overlay */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDownload(item.url, item.prompt);
+              }}
+              aria-label="Download image"
+              className="
+                absolute bottom-4 right-4 z-10
+                bg-white/20 backdrop-blur-md border border-white/30
+                text-white rounded-full p-2
+                opacity-0
+                group-hover:opacity-100 group-focus-within:opacity-100 group-active:opacity-100
+                transition-opacity duration-300
+                hover:bg-white/40 active:scale-95
+                focus:outline-none focus:ring-2 focus:ring-white/60
+                pointer-events-auto
+              "
+            >
+              <Download size={16} strokeWidth={2.5} />
+            </button>
           </motion.div>
         ))}
       </motion.div>
