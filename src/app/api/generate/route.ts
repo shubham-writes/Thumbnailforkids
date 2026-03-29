@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
-    // 2. Pass JWT to Convex to verify credits & approval
+    // 2. Pass JWT to Convex to verify credits
     const convexToken = await getToken({ template: "convex" });
     if (!convexToken) {
       return NextResponse.json({ success: false, error: "Convex Auth Token Missing" }, { status: 401 });
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: convexError.message || "Failed credit check" }, { status: 403 });
     }
 
-    const enhancedPrompt = `3D Pixar-style thumbnail of ${prompt}, bright vivid colors, expressive, kid-friendly. Wide shot, centered subject, important elements in middle, empty space top and bottom.`;
+    const enhancedPrompt = `3D Pixar-style thumbnail of ${prompt}, bright vivid colors, expressive, kid-friendly, . Extra wide shot taken from far away, centered subject, important elements in middle, empty space top and bottom.`;
 
     const apiReqBody = {
       text_prompts: [
@@ -90,30 +90,19 @@ export async function POST(req: Request) {
     // Decode base64 to buffer
     const imageBuffer = Buffer.from(base64Image, "base64");
 
-    // Process with sharp: crop to 16:9 from the center
+    // Process with sharp: resize and crop to 1280x720 from the center
     const image = sharp(imageBuffer);
-    const metadata = await image.metadata();
-
-    // We assume the original is 1:1 (e.g. 1024x1024)
-    const originalWidth = metadata.width || 1024;
-    const originalHeight = metadata.height || 1024;
-
-    // Calculate 16:9 dimensions based on width
-    const targetHeight = Math.round((originalWidth * 9) / 16);
-
-    // Ensure we don't try to extract more than what exists
-    const finalHeight = Math.min(targetHeight, originalHeight);
-    const topOffset = Math.max(0, Math.floor((originalHeight - finalHeight) / 2));
 
     const croppedBuffer = await image
-      .extract({
-        left: 0,
-        top: topOffset,
-        width: originalWidth,
-        height: finalHeight,
+      .resize(1280, 720, {
+        fit: "cover",
+        position: "center",
       })
       .toFormat("webp", { quality: 80 })
       .toBuffer();
+
+    // Reusing the already initialized authenticated convex client
+
 
     // 1. Get a short-lived upload URL
     const uploadUrl = await convex.mutation(api.thumbnails.generateUploadUrl);

@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wand2, Loader2, Sparkles, Lock } from "lucide-react";
+import { Wand2, Loader2, Sparkles, Lock, Loader } from "lucide-react";
 import ResultPreview from "./ResultPreview";
+import UpgradeModal from "./UpgradeModal";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useUser, useClerk } from "@clerk/nextjs";
@@ -12,9 +13,10 @@ export default function HeroSection() {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [resultImage, setResultImage] = useState<string | null>(null);
-  
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
   const saveHistory = useMutation(api.thumbnails.saveThumbnail);
-  
+
   const { user } = useUser();
   const { openSignIn } = useClerk();
   const convexUser = useQuery(api.users.getUser);
@@ -28,13 +30,9 @@ export default function HeroSection() {
       return;
     }
 
-    if (convexUser && !convexUser.isApproved) {
-      alert("Your account is pending manual approval.");
-      return;
-    }
-
+    // 10 Free Credits System Check
     if (convexUser && convexUser.credits <= 0) {
-      alert("You are out of credits! Please contact the administrator.");
+      setShowUpgradeModal(true);
       return;
     }
 
@@ -52,7 +50,7 @@ export default function HeroSection() {
       if (!response.ok) throw new Error(data.error || "Generation failed");
 
       setResultImage(data.imageUrl);
-      
+
       // Save it to Convex History
       await saveHistory({
         prompt,
@@ -69,20 +67,20 @@ export default function HeroSection() {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto pt-20 pb-10 px-4 flex flex-col items-center">
+    <div className="w-full max-w-3xl mx-auto pt-10 pb-10 px-4 flex flex-col items-center">
       <motion.div
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         className="text-center mb-10"
       >
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 backdrop-blur-md shadow-sm border border-purple-100 mb-6 text-purple-700 font-medium">
-          <Sparkles className="w-4 h-4" /> 1-Click Magic
+          One Click Magic
         </div>
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 pb-2">
-          Thumbnail Magic
+        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 pb-4">
+          Thumbnail Magica
         </h1>
         <p className="text-xl text-slate-600 font-medium">
-          Create eye-catching, kid-friendly thumbnails in seconds.
+          Create eye catching, kid friendly thumbnails in seconds.
         </p>
       </motion.div>
 
@@ -97,7 +95,7 @@ export default function HeroSection() {
           type="text"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Dinosaur driving a red firetruck 🦖🚒"
+          placeholder="Dinosaur driving a red firetruck..."
           className="flex-1 bg-white/80 outline-none text-xl md:text-2xl px-6 py-4 rounded-2xl placeholder:text-slate-400 focus:ring-4 focus:ring-purple-200 transition-all font-medium text-slate-800"
           autoFocus
           disabled={isGenerating}
@@ -132,12 +130,12 @@ export default function HeroSection() {
             {isGenerating ? (
               <div className="w-full aspect-video rounded-[2rem] glass-card flex items-center justify-center overflow-hidden relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite] skew-x-12" />
-                <div className="flex flex-col items-center gap-4 text-purple-600">
+                <div className="flex flex-col items-center gap-4 text-pink-500">
                   <motion.div
                     animate={{ rotate: 360, scale: [1, 1.2, 1] }}
                     transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
                   >
-                    <Wand2 className="w-12 h-12 text-pink-500" />
+                    <Loader className="w-12 h-12 text-pink-500" />
                   </motion.div>
                   <p className="font-bold text-xl animate-pulse">Sprinkling magic dust...</p>
                 </div>
@@ -151,6 +149,11 @@ export default function HeroSection() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+      />
     </div>
   );
 }

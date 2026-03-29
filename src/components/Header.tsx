@@ -3,37 +3,37 @@
 import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
 import { Authenticated, Unauthenticated, useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Sparkles, Coins } from "lucide-react";
+import { Sparkles, Coins, Wand } from "lucide-react";
 import { useEffect } from "react";
 
 function AuthSync() {
   const storeUser = useMutation(api.users.storeUser);
   const { user, isLoaded } = useUser();
-  
+
   useEffect(() => {
     if (isLoaded && user) {
       storeUser().catch(console.error);
     }
   }, [user, isLoaded, storeUser]);
-  
+
   return null;
 }
 
 export default function Header() {
   const convexUser = useQuery(api.users.getUser);
-  
+
   return (
     <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-white/70 border-b border-purple-100 shadow-sm">
       <Authenticated>
         <AuthSync />
       </Authenticated>
-      <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="max-w-5xl mx-auto px-4 h-18 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="bg-gradient-to-tr from-purple-500 to-pink-500 p-1.5 rounded-xl shadow-sm">
-            <Sparkles className="w-5 h-5 text-white" />
+            <Wand className="w-5 h-5 text-white" />
           </div>
-          <span className="font-extrabold text-xl tracking-tight text-slate-800">
-            KidsThumb
+          <span className="text-xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-500">
+            ThumbPop
           </span>
         </div>
 
@@ -58,11 +58,6 @@ export default function Header() {
                 <span className="text-sm font-bold text-slate-700">
                   {convexUser === undefined ? "..." : convexUser === null ? "..." : convexUser.credits} Credits
                 </span>
-                {convexUser && !convexUser.isApproved && (
-                  <span className="ml-2 text-xs text-red-500 font-bold bg-red-50 px-2 py-0.5 rounded-full border border-red-200">
-                    Pending Admin Approval
-                  </span>
-                )}
               </div>
               <UserButton appearance={{ elements: { avatarBox: "w-9 h-9 border-2 border-purple-200" } }} />
             </div>

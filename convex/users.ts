@@ -21,12 +21,12 @@ export const storeUser = mutation({
       return user._id; // already exists
     }
 
-    // New user, insert into DB
+    // New user, insert into DB with 10 free credits
     const newUserId = await ctx.db.insert("users", {
       tokenIdentifier: identity.tokenIdentifier,
       email: identity.email,
-      credits: 0, // starts at 0, requires manual approval
-      isApproved: false,
+      credits: 10, // 10 Free Credits System
+      isApproved: true, // Auto-approve all new users
     });
 
     return newUserId;
@@ -69,10 +69,6 @@ export const deductCredit = mutation({
 
     if (!user) {
       throw new Error("User does not exist in database");
-    }
-
-    if (!user.isApproved) {
-      throw new Error("Your account requires manual approval.");
     }
 
     if (user.credits <= 0) {

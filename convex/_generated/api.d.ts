@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as public_ from "../public.js";
 import type * as thumbnails from "../thumbnails.js";
 import type * as users from "../users.js";
 
@@ -18,6 +19,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  public: typeof public_;
   thumbnails: typeof thumbnails;
   users: typeof users;
 }>;

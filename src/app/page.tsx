@@ -1,6 +1,10 @@
+"use client";
+
 import Header from "../components/Header";
 import HeroSection from "../components/HeroSection";
 import HistoryGallery from "../components/HistoryGallery";
+import PublicGallery from "../components/PublicGallery";
+import { Authenticated, Unauthenticated } from "convex/react";
 
 export default function Home() {
   return (
@@ -8,12 +12,13 @@ export default function Home() {
       <Header />
       <HeroSection />
       
-      {/* Decorative Divider */}
-      <div className="w-full flex justify-center py-10 opacity-30">
-        <div className="w-24 h-2 rounded-full bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400"></div>
-      </div>
+      <Authenticated>
+        <HistoryGallery />
+      </Authenticated>
       
-      <HistoryGallery />
+      <Unauthenticated>
+        <PublicGallery />
+      </Unauthenticated>
     </main>
   );
 }
