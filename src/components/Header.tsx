@@ -53,10 +53,10 @@ export default function Header() {
 
           <Authenticated>
             <div className="flex items-center gap-3">
-              <div className="hidden sm:flex items-center gap-1.5 bg-purple-50 px-3 py-1.5 rounded-full border border-purple-100 shadow-inner">
-                <Coins className="w-4 h-4 text-orange-400" />
-                <span className="text-sm font-bold text-slate-700">
-                  {convexUser === undefined ? "..." : convexUser === null ? "..." : convexUser.credits} Credits
+              <div className="flex items-center gap-1 sm:gap-1.5 bg-purple-50 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border border-purple-100 shadow-inner">
+                <Coins className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-400" />
+                <span className="text-xs sm:text-sm font-bold text-slate-700">
+                  {convexUser === undefined ? "..." : convexUser === null ? "..." : convexUser.credits} <span className="hidden sm:inline">Credits</span>
                 </span>
               </div>
               <UserButton appearance={{ elements: { avatarBox: "w-9 h-9 border-2 border-purple-200" } }} />
