@@ -27,35 +27,53 @@ export default function ResultPreview({ imageUrl, onRegenerate }: ResultPreviewP
   };
 
   return (
-    <div className="w-full aspect-video rounded-3xl overflow-hidden glass-card relative group shadow-2xl">
-      <motion.img
-        src={imageUrl}
-        alt="Generated Thumbnail"
-        className="w-full h-full object-cover rounded-3xl border-4 border-white shadow-inner"
-        initial={{ opacity: 0, scale: 0.8, filter: "blur(10px)" }}
-        animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-        transition={{ duration: 0.5, type: "spring" }}
-      />
-      
-      {/* Overlay Actions */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileHover={{ opacity: 1 }}
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center gap-6 opacity-0 md:group-hover:opacity-100 transition-opacity"
-      >
+    <div className="w-full flex flex-col gap-4">
+      <div className="w-full aspect-video rounded-3xl overflow-hidden glass-card relative group shadow-2xl">
+        <motion.img
+          src={imageUrl}
+          alt="Generated Thumbnail"
+          className="w-full h-full object-cover rounded-3xl border-4 border-white shadow-inner"
+          initial={{ opacity: 0, scale: 0.8, filter: "blur(10px)" }}
+          animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+          transition={{ duration: 0.5, type: "spring" }}
+        />
+        
+        {/* Desktop Hover Overlay Actions */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileHover={{ opacity: 1 }}
+          className="absolute inset-0 bg-black/40 backdrop-blur-sm hidden md:flex items-center justify-center gap-6 opacity-0 md:group-hover:opacity-100 transition-opacity"
+        >
+          <button
+            onClick={handleDownload}
+            className="bg-white text-purple-600 hover:bg-purple-50 p-4 rounded-full shadow-xl hover:scale-105 transition-transform flex items-center gap-2 font-bold cursor-pointer"
+          >
+            <Download className="w-6 h-6" /> Download
+          </button>
+          <button
+            onClick={onRegenerate}
+            className="bg-purple-600 text-white hover:bg-purple-500 p-4 rounded-full shadow-xl hover:scale-105 transition-transform flex items-center gap-2 font-bold cursor-pointer"
+          >
+            <RefreshCcw className="w-6 h-6" /> Regenerate
+          </button>
+        </motion.div>
+      </div>
+
+      {/* Mobile Actions (Visible below image only on mobile) */}
+      <div className="flex md:hidden flex-col sm:flex-row gap-3 w-full">
         <button
           onClick={handleDownload}
-          className="bg-white text-purple-600 hover:bg-purple-50 p-4 rounded-full shadow-xl hover:scale-105 transition-transform flex items-center gap-2 font-bold"
+          className="flex-1 bg-white text-purple-600 border border-purple-100 p-4 rounded-2xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-2 font-bold text-lg"
         >
-          <Download className="w-6 h-6" /> Download
+          <Download className="w-5 h-5" /> Download
         </button>
         <button
           onClick={onRegenerate}
-          className="bg-purple-600 text-white hover:bg-purple-500 p-4 rounded-full shadow-xl hover:scale-105 transition-transform flex items-center gap-2 font-bold"
+          className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 rounded-2xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-2 font-bold text-lg"
         >
-          <RefreshCcw className="w-6 h-6" /> Regenerate
+          <RefreshCcw className="w-5 h-5" /> Regenerate
         </button>
-      </motion.div>
+      </div>
     </div>
   );
 }

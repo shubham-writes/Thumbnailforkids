@@ -76,10 +76,10 @@ export default function HeroSection() {
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 backdrop-blur-md shadow-sm border border-purple-100 mb-6 text-purple-700 font-medium">
           One Click Magic
         </div>
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 pb-4">
+        <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 pb-2 sm:pb-4">
           Thumbnail Magica
         </h1>
-        <p className="text-xl text-slate-600 font-medium">
+        <p className="text-lg sm:text-xl text-slate-600 font-medium">
           Create eye catching, kid friendly thumbnails in seconds.
         </p>
       </motion.div>
@@ -89,14 +89,14 @@ export default function HeroSection() {
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.1 }}
-        className="w-full glass-card rounded-3xl p-3 flex flex-col md:flex-row gap-3 relative z-10"
+        className="w-full glass-card rounded-3xl  p-2 sm:p-3 flex flex-col md:flex-row gap-2 sm:gap-3 relative z-10"
       >
         <input
           type="text"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="Dinosaur driving a red firetruck..."
-          className="flex-1 bg-white/80 outline-none text-xl md:text-2xl px-6 py-4 rounded-2xl placeholder:text-slate-400 focus:ring-4 focus:ring-purple-200 transition-all font-medium text-slate-800"
+          className="flex-1 bg-white/80 outline-none text-lg sm:text-xl md:text-2xl px-5 py-4 sm:px-6 sm:py-4 rounded-2xl placeholder:text-slate-400 focus:ring-4 focus:ring-purple-200 transition-all font-medium text-slate-800"
           autoFocus
           disabled={isGenerating}
         />
@@ -105,7 +105,7 @@ export default function HeroSection() {
           whileTap={{ scale: 0.95 }}
           type="submit"
           disabled={!prompt.trim() || isGenerating}
-          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-xl px-8 py-4 rounded-2xl shadow-lg shadow-purple-500/30 flex items-center justify-center gap-2 hover:shadow-xl hover:shadow-purple-500/40 transition-shadow disabled:opacity-50"
+          className="w-full md:w-auto bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-lg sm:text-xl px-6 py-4 sm:px-8 sm:py-4 rounded-2xl shadow-lg shadow-purple-500/30 flex items-center justify-center gap-2 hover:shadow-xl hover:shadow-purple-500/40 transition-shadow disabled:opacity-50"
         >
           {isGenerating ? (
             <>

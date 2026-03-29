@@ -47,10 +47,11 @@
 @layer utilities {
   /* Blob animation background */
   .bg-mesh {
-    background: radial-gradient(circle at top left, hsl(280, 100%, 90%), transparent 40%),
-                radial-gradient(circle at bottom right, hsl(45, 100%, 85%), transparent 40%),
-                radial-gradient(circle at bottom left, hsl(195, 100%, 90%), transparent 40%);
+    background: radial-gradient(circle at top left, hsl(280, 100%, 90%), transparent 50%),
+                radial-gradient(circle at bottom right, hsl(45, 100%, 85%), transparent 50%),
+                radial-gradient(circle at bottom left, hsl(195, 100%, 90%), transparent 50%);
     background-color: hsl(210, 40%, 98%);
+    background-attachment: fixed;
   }
   .glass-card {
     background-color: rgba(255, 255, 255, 0.6);
