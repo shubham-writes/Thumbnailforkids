@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wand2, Loader2, Sparkles } from "lucide-react";
+import { Wand2, Loader2, Sparkles, Lock } from "lucide-react";
 import ResultPreview from "./ResultPreview";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { useUser, useClerk } from "@clerk/nextjs";
 
 export default function HeroSection() {
   const [prompt, setPrompt] = useState("");
@@ -13,10 +14,29 @@ export default function HeroSection() {
   const [resultImage, setResultImage] = useState<string | null>(null);
   
   const saveHistory = useMutation(api.thumbnails.saveThumbnail);
+  
+  const { user } = useUser();
+  const { openSignIn } = useClerk();
+  const convexUser = useQuery(api.users.getUser);
 
   const handleGenerate = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!prompt.trim() || isGenerating) return;
+
+    if (!user) {
+      openSignIn();
+      return;
+    }
+
+    if (convexUser && !convexUser.isApproved) {
+      alert("Your account is pending manual approval.");
+      return;
+    }
+
+    if (convexUser && convexUser.credits <= 0) {
+      alert("You are out of credits! Please contact the administrator.");
+      return;
+    }
 
     setIsGenerating(true);
     setResultImage(null);
@@ -37,11 +57,12 @@ export default function HeroSection() {
       await saveHistory({
         prompt,
         imageUrl: data.imageUrl,
+        userId: user.id,
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("Oops! Something went wrong generating your thumbnail.");
+      alert(error.message || "Oops! Something went wrong generating your thumbnail.");
     } finally {
       setIsGenerating(false);
     }

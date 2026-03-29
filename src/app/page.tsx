@@ -1,9 +1,11 @@
+import Header from "../components/Header";
 import HeroSection from "../components/HeroSection";
 import HistoryGallery from "../components/HistoryGallery";
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-mesh w-full">
+      <Header />
       <HeroSection />
       
       {/* Decorative Divider */}

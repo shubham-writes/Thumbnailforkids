@@ -2,16 +2,39 @@ import { NextResponse } from "next/server";
 import sharp from "sharp";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../../../../convex/_generated/api";
+import { auth } from "@clerk/nextjs/server";
 
 export async function POST(req: Request) {
   try {
-    const { prompt, userId } = await req.json();
+    const { prompt } = await req.json();
 
     if (!prompt) {
       return NextResponse.json(
         { success: false, error: "Prompt is required" },
         { status: 400 }
       );
+    }
+
+    // 1. Authenticate with Clerk via Next.js Server
+    const { userId, getToken } = await auth();
+    if (!userId) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    // 2. Pass JWT to Convex to verify credits & approval
+    const convexToken = await getToken({ template: "convex" });
+    if (!convexToken) {
+      return NextResponse.json({ success: false, error: "Convex Auth Token Missing" }, { status: 401 });
+    }
+
+    const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+    convex.setAuth(convexToken);
+
+    try {
+      // Deduct a credit before calling Nvidia
+      await convex.mutation(api.users.deductCredit);
+    } catch (convexError: any) {
+      return NextResponse.json({ success: false, error: convexError.message || "Failed credit check" }, { status: 403 });
     }
 
     const enhancedPrompt = `3D Pixar-style thumbnail of ${prompt}, bright vivid colors, expressive, kid-friendly. Wide shot, centered subject, important elements in middle, empty space top and bottom.`;
@@ -91,8 +114,6 @@ export async function POST(req: Request) {
       })
       .toFormat("webp", { quality: 80 })
       .toBuffer();
-
-    const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
     // 1. Get a short-lived upload URL
     const uploadUrl = await convex.mutation(api.thumbnails.generateUploadUrl);
