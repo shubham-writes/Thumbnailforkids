@@ -19,14 +19,13 @@ export default function HistoryGallery() {
   }
 
   if (thumbnails.length === 0) {
-    return null; // Empty state
+    return null;
   }
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 pb-20">
       <div className="flex items-center gap-2 mb-8">
         <h2 className="text-3xl font-extrabold text-slate-800">Recent Magicas</h2>
-
       </div>
 
       <motion.div
@@ -36,7 +35,7 @@ export default function HistoryGallery() {
         viewport={{ once: true, margin: "-100px" }}
         variants={{
           visible: { transition: { staggerChildren: 0.1 } },
-          hidden: {}
+          hidden: {},
         }}
       >
         {thumbnails.map((item) => {
@@ -47,7 +46,7 @@ export default function HistoryGallery() {
               key={item._id}
               variants={{
                 hidden: { opacity: 0, y: 20 },
-                visible: { opacity: 1, y: 0 }
+                visible: { opacity: 1, y: 0 },
               }}
               whileHover={{ y: -5, scale: 1.02 }}
               onHoverStart={() => setActiveId(item._id)}
@@ -62,36 +61,41 @@ export default function HistoryGallery() {
                 loading="lazy"
               />
 
-              {/* Secure React State Overlay */}
-              <div 
-                className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4 transition-opacity duration-300 ${isActive ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+              {/* Gradient overlay with prompt text — pointer-events-none so it never blocks the button */}
+              <div
+                className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4 transition-opacity duration-300 pointer-events-none ${isActive ? "opacity-100" : "opacity-0"
+                  }`}
               >
-                <p className="text-white text-sm font-medium line-clamp-2 leading-tight mb-2 drop-shadow-md">
+                <p className="text-white text-sm font-medium line-clamp-2 leading-tight drop-shadow-md pr-10">
                   "{item.prompt}"
                 </p>
-                <button
-                  onClick={async (e) => {
-                    e.stopPropagation(); // Stop parent onClick from toggling
-                    try {
-                      const response = await fetch(item.imageUrl);
-                      const blob = await response.blob();
-                      const url = window.URL.createObjectURL(blob);
-                      const a = document.createElement("a");
-                      a.href = url;
-                      a.download = `KidsThumb-${item._id}.png`;
-                      a.click();
-                      window.URL.revokeObjectURL(url);
-                    } catch (error) {
-                      console.error("Gallery download failed", error);
-                      window.open(item.imageUrl, "_blank");
-                    }
-                  }}
-                  className="self-end bg-white/20 hover:bg-white/40 p-2 rounded-full backdrop-blur-md transition-colors cursor-pointer"
-                  title="Download"
-                >
-                  <Download className="w-4 h-4 text-white" />
-                </button>
               </div>
+
+              {/* ✅ Download button — outside the pointer-events-none overlay */}
+              <button
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  try {
+                    const response = await fetch(item.imageUrl);
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `KidsThumb-${item._id}.png`;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                  } catch (error) {
+                    console.error("Gallery download failed", error);
+                    window.open(item.imageUrl, "_blank");
+                  }
+                }}
+                aria-label="Download image"
+                title="Download"
+                className={`absolute bottom-3 right-3 z-10 bg-white/20 hover:bg-white/40 active:scale-95 p-2 rounded-full backdrop-blur-md border border-white/30 transition-all duration-300 pointer-events-auto focus:outline-none focus:ring-2 focus:ring-white/60 ${isActive ? "opacity-100" : "opacity-0"
+                  }`}
+              >
+                <Download className="w-4 h-4 text-white" />
+              </button>
             </motion.div>
           );
         })}
